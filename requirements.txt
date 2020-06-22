@@ -1,0 +1,10 @@
+# Base
+django>=2.2,<2.3
+django-oscar==2.0.4
+paypal-checkout-serversdk
+paypalhttp==1.0.0
+
+# Testing
+pytest
+pytest-django
+pytest-cov
