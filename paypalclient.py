@@ -51,4 +51,4 @@ class PayPalClient:
         return result;
 
     def is_primittive(self, data):
-        return isinstance(data, str) or isinstance(data, str) or isinstance(data, int)
+        return isinstance(data, str) or isinstance(data, int)
