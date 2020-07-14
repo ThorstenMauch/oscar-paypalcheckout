@@ -69,7 +69,7 @@ class CreatePaypalOrder(PayPalClient):
             "user_action": "CONTINUE"
         }
 
-    def build_request_body(self, order_number, order_total,shipping_address) -> dict:
+    def build_request_body(self, order_number, order_total,shipping_address, shipping_method) -> dict:
         return {
             "intent": 'CAPTURE',
             "application_context": self.get_application_context(order_number),
@@ -80,7 +80,7 @@ class CreatePaypalOrder(PayPalClient):
                     "value": str(order_total.incl_tax),
                 },
                 "shipping": {
-                    "method": "DHL",
+                    "method": shipping_method.name,
                     "name": {
                         "full_name": self.get_name(shipping_address),
                     },
@@ -89,16 +89,20 @@ class CreatePaypalOrder(PayPalClient):
             }]
         }
 
-    def create_order(self, order_number, order_total, shipping_address) -> Optional[str]:
+    def create_order(self, order_number, order_total, shipping_address, shipping_method) -> Optional[str]:
         """
         :param order_number: the Oscar Order Number
         :param order_total: total of the order
         :param shipping_address: shipping address oscar object
         :return: the approve link to redirect to paypal
         """
+
+
+
+
         request = OrdersCreateRequest()
         request.headers['prefer'] = 'return=representation'
-        body = self.build_request_body(order_number, order_total, shipping_address)
+        body = self.build_request_body(order_number, order_total, shipping_address, shipping_method)
         request.request_body(body)
         response = self.client.execute(request)
 
