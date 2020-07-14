@@ -1,13 +1,17 @@
+import sys
 import json
+import logging
+
+
 from typing import Optional, Union, TYPE_CHECKING
 
 from django.conf import settings
 from .paypalclient import PayPalClient
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest
 
-if TYPE_CHECKING:
-    from paypalhttp.http_response import HttpResponse
-    from paypalhttp.http_error import HttpError
+
+from paypalhttp.http_response import HttpResponse
+from paypalhttp.http_error import HttpError
 
 
 PAYPAL_SUCCESS_PAGE = getattr(settings, 'PAYPAL_SUCCESS_PAGE')
@@ -16,15 +20,17 @@ PAYPAL_BRAND_NAME = getattr(settings, 'PAYPAL_BRAND_NAME')
 PAYPAL_DEBUG = getattr(settings, 'PAYPAL_DEBUG', True)
 
 
+logger = logging.getLogger()
+
+
 class CapturePaypalOrder(PayPalClient):
-    def capture(self, paypal_order_id) -> Union[HttpResponse, HttpError]:
-        request = OrdersCaptureRequest(paypal_order_id)
-        # 3. Call PayPal to capture an order
-        response = self.client.execute(request)
-        if PAYPAL_DEBUG:
-            json_data = self.object_to_json(response.result)
-            print(json.dumps(json_data, indent=4))
-        return response
+        def capture(self, paypal_order_id) -> Union[HttpResponse, HttpError]:
+            request = OrdersCaptureRequest(paypal_order_id)
+            # 3. Call PayPal to capture an order
+            response = self.client.execute(request)
+            if PAYPAL_DEBUG:
+                logger.debug(json.dumps(self.object_to_json(response.result), indent=4))
+            return response
 
 
 class CreatePaypalOrder(PayPalClient):
@@ -50,7 +56,8 @@ class CreatePaypalOrder(PayPalClient):
 
         """
         if PAYPAL_DEBUG:
-            print("App context  Orderno " + str(orderno))
+            logger.debug("App context  Orderno " + str(orderno))
+
 
         return {
             "return_url": PAYPAL_SUCCESS_PAGE + str(orderno),
@@ -96,8 +103,7 @@ class CreatePaypalOrder(PayPalClient):
         response = self.client.execute(request)
 
         if PAYPAL_DEBUG:
-            json_data = self.object_to_json(response.result)
-            print("json_data: ", json.dumps(json_data, indent=4))
+            logger.debug(json.dumps(self.object_to_json(response.result), indent=4))
 
         for link in response.result.links:
             if link.rel == "approve":
